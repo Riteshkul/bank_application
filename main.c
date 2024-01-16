@@ -200,14 +200,28 @@ void balanceEnquiry(const struct bank_account *accounts, int cus, const char acc
     }
 }
 
-void fundTransfer(struct bank_account *accounts, int cus, const char from_acc_no[], const char to_acc_no[],int from_index,int to_index) {
+void fundTransfer(struct bank_account *accounts, int cus, const char from_acc_no[], const char to_acc_no[], int amount) {
+    int from_index = -1;
+    int to_index = -1;
+
+    // Find the indices of the source and destination accounts
+    for (int i = 0; i < strlen(accounts); i++) {
+        if (strcmp(accounts[i].acc_no, from_acc_no) == 0) {
+            from_index = i;
+        }
+        if (strcmp(accounts[i].acc_no, to_acc_no) == 0) {
+            to_index = i;
+        }
+
+        // If both source and destination accounts are found, break from the loop
+        if (from_index != -1 && to_index != -1) {
+            break;
+        }
+    }
 
     // Check if both accounts are found
-
+    if (from_index != -1 && to_index != -1) {
         // Check if the source account has sufficient balance
-        int amount;
-        printf("Enter the amount to transfer: ");
-        scanf("%d", &amount);
         if (amount > 0 && amount <= accounts[from_index].balance) {
             // Perform funds transfer
             accounts[from_index].balance -= amount;
@@ -218,6 +232,9 @@ void fundTransfer(struct bank_account *accounts, int cus, const char from_acc_no
         } else {
             printf("Invalid transfer amount or insufficient balance in account %s.\n", from_acc_no);
         }
+    } else {
+        printf("One or both of the accounts not found.\n");
+    }
 }
 
 
@@ -386,14 +403,11 @@ void updateAccountDetails(struct bank_account *accounts, int cus) {
 int main()
 {
     int cus,choice;
-
     char ch;
 
     do
     {
-        int from_index=-1,to_index=-1;
-        char fromAccNo[20];
-        char toAccNo[20];
+
         printf("\n*************** Welcome To HDFC Bank *****************\n");
         printf("1. Create Account\n");
         printf("2. Update Account Details\n");
@@ -439,40 +453,19 @@ int main()
                 withdraw(ba, cus, withdrawAccNo, withdrawAmount);
                 break;
             case 5:
+                 printf("Enter source account number for funds transfer: ");
+                char fromAccNo[20];
+                scanf("%s", fromAccNo);
 
-                do{
-                    printf("Enter source account number for funds transfer: ");
+                printf("Enter destination account number for funds transfer: ");
+                char toAccNo[20];
+                scanf("%s", toAccNo);
 
-                    scanf("%s", fromAccNo);
-                    for (int i = 0; i < strlen(ba); i++) {
-                        if (strcmp(ba[i].acc_no, fromAccNo) == 0) {
-                            from_index = i;
-                        }
-                    }
-                    if(from_index==-1)
-                    {
-                        printf("invalid account number!! Please enter a valid one.\n");
-                    }
-                }while(from_index==-1);
+                int transferAmount;
+                printf("Enter the amount to transfer: ");
+                scanf("%d", &transferAmount);
 
-
-                do{
-                        printf("Enter destination account number for funds transfer: ");
-
-                        scanf("%s", toAccNo);
-                        for (int i = 0; i < strlen(ba); i++) {
-                        if (strcmp(ba[i].acc_no, toAccNo) == 0) {
-                            to_index = i;
-                        }
-                    }
-                    if(to_index==-1){
-                            printf("invalid account number!! Please enter a valid one.\n");
-                    }
-                }while(to_index==-1);
-
-
-
-                fundTransfer(ba, cus, fromAccNo, toAccNo,from_index,to_index);
+                fundTransfer(ba, cus, fromAccNo, toAccNo, transferAmount);
                 break;
             case 6:
                 searchAccountHolder(ba, cus);
